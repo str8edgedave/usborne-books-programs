@@ -1,0 +1,503 @@
+"Haunted House" by "BASIC Game Conversion"
+
+The story headline is "An Adventure in a Haunted House".
+The story description is "You find yourself at a haunted house. Can you collect all the treasures and escape?".
+The story creation year is 2025.
+
+Volume - Game Setup
+
+Book - Setup and Constants
+
+Use scoring.
+The maximum score is 34. [17 treasures, double score if you return to gate with all treasures]
+
+When play begins:
+	say "HAUNTED HOUSE[line break]----------------------[line break]Find the treasures and return to the gate to win!";
+	now the left hand status line is "[location]";
+	now the right hand status line is "Score: [score]/[maximum score]".
+
+The player has a number called light-level. The light-level of the player is 60.
+The player has a truth state called has-lit-candle. The has-lit-candle of the player is false.
+
+Every turn:
+	if the has-lit-candle of the player is true:
+		decrease the light-level of the player by 1;
+		if the light-level of the player is 10:
+			say "Your candle is waning!";
+		if the light-level of the player is 1:
+			say "Your candle is out!";
+			now the has-lit-candle of the player is false;
+	if the location is Dark-Corner or the location is Bottom-of-Spiral-Staircase or the location is Small-Dark-Room or the location is Gloomy-Passage:
+		if the has-lit-candle of the player is false:
+			say "It's too dark to move!";
+	if a random chance of 1 in 3 succeeds and the location is Rear-Turret-Room and attacking-bats is true:
+		say "Bats attacking!";
+	if a random chance of 1 in 2 succeeds and the location is Very-Cold-Chamber:
+		if the vacuum is switched on:
+			do nothing;
+		otherwise:
+			now the attacking-ghosts is true.
+
+After looking:
+	repeat with item running through things in the location:
+		if the item is not fixed in place and the item is not the player and the item is visible:
+			say "You can see [item] here.";
+	say "============================"
+
+Book - Objects and Properties
+
+A thing can be fixed in place. A thing is usually not fixed in place.
+The description of a thing is usually "You see nothing special about [the item described]."
+
+Book - Game Command Extensions
+
+Understand "score" as requesting the score.
+
+Understand "help" as asking for help. Asking for help is an action applying to nothing.
+Carry out asking for help:
+	say "Words I know: help, inventory, go, north, south, west, east, up, down, take, drop, open, examine, read, say, dig, swing, climb, light, unlight, spray, use, unlock, leave, score.";
+	
+Understand "dig" as digging. Digging is an action applying to nothing.
+Carry out digging:
+	if the player carries the shovel:
+		if the location is Cellar-with-Barred-Window:
+			say "You dug the bars out.";
+			now the description of Cellar-with-Barred-Window is "A cellar with a hole in the wall.";
+			now the east exit of Cellar-with-Barred-Window is Cliff-Path2;
+		otherwise:
+			say "You made a hole.";
+	otherwise:
+		say "You have nothing to dig with.";
+
+Understand "climb" as climbing. Climbing is an action applying to nothing.
+Carry out climbing:
+	if the location is Blasted-Tree:
+		if the rope is in Blasted-Tree:
+			if the player has elevated:
+				say "Going down!";
+				now the player has not elevated;
+			otherwise:
+				say "You see thick forest and cliff south.";
+				now the player has elevated;
+		otherwise:
+			say "There's nothing to climb here.";
+	otherwise:
+		say "There's nothing to climb here.";
+
+The player can have elevated. The player is not elevated.
+
+Understand "swing [something]" as swinging. Swinging is an action applying to one thing.
+Carry out swinging:
+	if the noun is the axe and the player carries the axe:
+		say "You swung it.";
+		if the location is Study-with-Desk:
+			say "You broke the thin wall!";
+			now the west exit of Study-with-Desk is Weird-Cobwebby-Room;
+			now the description of Study-with-Desk is "Study with secret room.";
+	otherwise if the noun is the rope and the player carries the rope:
+		say "Whoosh!";
+		if the location is Study-with-Desk:
+			say "You broke the thin wall!";
+			now the west exit of Study-with-Desk is Weird-Cobwebby-Room;
+			now the description of Study-with-Desk is "Study with secret room.";
+	otherwise:
+		say "This is no time to play games.";
+
+Understand "light [something]" as lighting. Lighting is an action applying to one thing.
+Carry out lighting:
+	if the noun is the candle and the player carries the candle:
+		if the player does not carry the matches:
+			say "Nothing to light it with.";
+		otherwise if the player does not carry the candlestick:
+			say "It will burn your hands.";
+		otherwise:
+			say "It casts a flickering light.";
+			now the has-lit-candle of the player is true;
+	otherwise:
+		say "You can't light that.";
+
+Understand "unlight" as unlighting. Unlighting is an action applying to nothing.
+Carry out unlighting:
+	if the has-lit-candle of the player is true:
+		say "Extinguished.";
+		now the has-lit-candle of the player is false;
+	otherwise:
+		say "Nothing to extinguish.";
+
+Understand "spray [something]" as spraying. Spraying is an action applying to one thing.
+Carry out spraying:
+	if the noun is the bats and the player carries the aerosol:
+		say "Hissss...";
+		if the attacking-bats is true:
+			say "Pfft! Got them.";
+			now the attacking-bats is false;
+	otherwise:
+		say "You can't spray that.";
+
+The bats are a thing. The bats are fixed in place.
+Attacking-bats is a truth state that varies. Attacking-bats is true.
+
+The ghosts are a thing. The ghosts are fixed in place.
+Attacking-ghosts is a truth state that varies. Attacking-ghosts is false.
+
+Understand "use [something]" as using. Using is an action applying to one thing.
+Carry out using:
+	if the noun is the vacuum and the player carries the vacuum and the player carries the batteries:
+		say "Switched on.";
+		now the vacuum is switched on;
+		if the attacking-ghosts is true:
+			say "Whizz - vacuumed the ghosts up!";
+			now the attacking-ghosts is false;
+	otherwise:
+		say "You can't use that right now.";
+
+The vacuum can be switched on or switched off. The vacuum is switched off.
+
+Understand "say [text]" as saying. Saying is an action applying to one topic.
+Carry out saying:
+	say "Ok '[topic understood]'";
+	if the topic understood matches the text "xzanfar" and the player carries the magic-spells:
+		say "*magic occurs*";
+		if the location is Deep-Cellar-with-Coffin:
+			say "The magical barrier has been broken!";
+			now the magical-barrier is false;
+		otherwise:
+			let random-room be a random room;
+			now the player is in random-room;
+	otherwise:
+		do nothing;
+
+Magical-barrier is a truth state that varies. Magical-barrier is true.
+
+Volume - Game World
+
+Book - Room Layout
+
+[First row (0-7)]
+Dark-Corner is a room. "A dark corner."
+Overgrown-Garden is a room. "An overgrown garden."
+By-Large-Woodpile is a room. "By a large woodpile."
+Yard-by-Rubbish is a room. "Yard by rubbish."
+Weedpatch is a room. "A weedpatch."
+Forest is a room. "A forest."
+Thick-Forest is a room. "A thick forest."
+Blasted-Tree is a room. "A blasted tree."
+
+[Second row (8-15)]
+Corner-of-House is a room. "Corner of house."
+Entrance-to-Kitchen is a room. "Entrance to kitchen."
+Kitchen is a room. "Kitchen with a grimy cooker."
+Scullery-Door is a room. "Scullery door."
+Room-with-Inches-of-Dust is a room. "A room with inches of dust."
+Rear-Turret-Room is a room. "Rear turret room."
+Clearing-by-House is a room. "Clearing by house."
+Path is a room. "A path."
+
+[Third row (16-23)]
+Side-of-House is a room. "Side of house."
+Back-of-Hallway is a room. "Back of hallway."
+Dark-Alcove is a room. "A dark alcove."
+Small-Dark-Room is a room. "A small dark room."
+Bottom-of-Spiral-Staircase is a room. "Bottom of spiral staircase."
+Wide-Passage is a room. "A wide passage."
+Slippery-Steps is a room. "Slippery steps."
+Clifftop is a room. "Clifftop."
+
+[Fourth row (24-31)]
+Near-Crumbling-Wall is a room. "Near crumbling wall."
+Gloomy-Passage is a room. "A gloomy passage."
+Pool-of-Light is a room. "Pool of light."
+Impressive-Vaulted-Hallway is a room. "An impressive vaulted hallway."
+Hall-by-Thick-Wooden-Door is a room. "Hall by thick wooden door."
+Trophy-Room is a room. "Trophy room."
+Cellar-with-Barred-Window is a room. "Cellar with barred window."
+Cliff-Path is a room. "Cliff path."
+
+[Fifth row (32-39)]
+Cupboard-with-Hanging-Coat is a room. "Cupboard with hanging coat."
+Front-Hall is a room. "Front hall."
+Sitting-Room is a room. "Sitting room."
+Secret-Room is a room. "Secret room."
+Steep-Marble-Stairs is a room. "Steep marble stairs."
+Dining-Room is a room. "Dining room."
+Deep-Cellar-with-Coffin is a room. "Deep cellar with coffin."
+Cliff-Path2 is a room. "Cliff path."
+
+[Sixth row (40-47)]
+Closet is a room. "A closet."
+Front-Lobby is a room. "Front lobby."
+Library-of-Evil-Books is a room. "Library of evil books."
+Study-with-Desk is a room. "Study with desk & hole in wall."
+Weird-Cobwebby-Room is a room. "A weird cobwebby room."
+Very-Cold-Chamber is a room. "A very cold chamber."
+Spooky-Room is a room. "A spooky room."
+Soggy-Path is a room. "A soggy path."
+
+[Seventh row (48-55)]
+Rubble-Strewn-Verandah is a room. "A rubble-strewn verandah."
+Front-Porch is a room. "Front porch."
+Front-Tower is a room. "Front tower."
+Sloping-Corridor is a room. "A sloping corridor."
+Upper-Gallery is a room. "Upper gallery."
+Marsh-by-Wall is a room. "Marsh by wall."
+Marsh is a room. "A marsh."
+Soggy-Path2 is a room. "A soggy path."
+
+[Eighth row (56-63)]
+By-Twisted-Railing is a room. "By twisted railing."
+Path-Through-Iron-Gate is a room. "Path through iron gate."
+By-Railings is a room. "By railings."
+Beneath-Front-Tower is a room. "Beneath front tower."
+Debris-from-Crumbling-Facade is a room. "Debris from crumbling facade."
+Large-Fallen-Brickwork is a room. "Large fallen brickwork."
+Rotting-Stone-Arch is a room. "Rotting stone arch."
+Crumbling-Clifftop is a room. "Crumbling clifftop."
+
+The player is in Path-Through-Iron-Gate.
+
+Book - Room Connections
+
+[Create all the directional connections between rooms based on the BASIC data]
+[First row connections]
+South of Dark-Corner is Corner-of-House. East of Dark-Corner is Overgrown-Garden.
+West of Overgrown-Garden is Dark-Corner. East of Overgrown-Garden is By-Large-Woodpile.
+West of By-Large-Woodpile is Overgrown-Garden. East of By-Large-Woodpile is Yard-by-Rubbish.
+South of Yard-by-Rubbish is Entrance-to-Kitchen. West of Yard-by-Rubbish is By-Large-Woodpile. East of Yard-by-Rubbish is Weedpatch.
+West of Weedpatch is Yard-by-Rubbish. East of Weedpatch is Forest.
+West of Forest is Weedpatch. East of Forest is Thick-Forest.
+South of Thick-Forest is Clearing-by-House. West of Thick-Forest is Forest. East of Thick-Forest is Blasted-Tree.
+West of Blasted-Tree is Thick-Forest. South of Blasted-Tree is Path.
+
+[Second row connections]
+North of Corner-of-House is Dark-Corner. South of Corner-of-House is Side-of-House.
+South of Entrance-to-Kitchen is Back-of-Hallway. East of Entrance-to-Kitchen is Kitchen.
+West of Kitchen is Entrance-to-Kitchen. East of Kitchen is Scullery-Door.
+North of Scullery-Door is Yard-by-Rubbish. West of Scullery-Door is Kitchen.
+South of Room-with-Inches-of-Dust is Dark-Alcove. East of Room-with-Inches-of-Dust is Rear-Turret-Room.
+West of Rear-Turret-Room is Room-with-Inches-of-Dust.
+North of Clearing-by-House is Thick-Forest. East of Clearing-by-House is Path.
+North of Path is Blasted-Tree. South of Path is Slippery-Steps. West of Path is Clearing-by-House.
+
+[Third row connections]
+North of Side-of-House is Corner-of-House. South of Side-of-House is Near-Crumbling-Wall.
+North of Back-of-Hallway is Entrance-to-Kitchen. South of Back-of-Hallway is Gloomy-Passage.
+North of Dark-Alcove is Room-with-Inches-of-Dust. South of Dark-Alcove is Pool-of-Light. East of Dark-Alcove is Small-Dark-Room.
+West of Small-Dark-Room is Dark-Alcove.
+North of Bottom-of-Spiral-Staircase is Small-Dark-Room. South of Bottom-of-Spiral-Staircase is Impressive-Vaulted-Hallway. Up of Bottom-of-Spiral-Staircase is Front-Tower. Down of Bottom-of-Spiral-Staircase is Spooky-Room.
+South of Wide-Passage is Hall-by-Thick-Wooden-Door. East of Wide-Passage is Bottom-of-Spiral-Staircase.
+West of Slippery-Steps is Wide-Passage. South of Slippery-Steps is Clifftop. Up of Slippery-Steps is Front-Porch. Down of Slippery-Steps is Marsh-by-Wall.
+North of Clifftop is Slippery-Steps. South of Clifftop is Cliff-Path.
+
+[Fourth row connections]
+North of Near-Crumbling-Wall is Side-of-House. South of Near-Crumbling-Wall is Rubble-Strewn-Verandah.
+North of Gloomy-Passage is Back-of-Hallway. South of Gloomy-Passage is Front-Lobby.
+North of Pool-of-Light is Dark-Alcove. South of Pool-of-Light is Front-Hall. East of Pool-of-Light is Impressive-Vaulted-Hallway.
+West of Impressive-Vaulted-Hallway is Pool-of-Light. North of Impressive-Vaulted-Hallway is Bottom-of-Spiral-Staircase. South of Impressive-Vaulted-Hallway is Steep-Marble-Stairs. East of Impressive-Vaulted-Hallway is Hall-by-Thick-Wooden-Door.
+West of Hall-by-Thick-Wooden-Door is Impressive-Vaulted-Hallway. East of Hall-by-Thick-Wooden-Door is Trophy-Room.
+North of Trophy-Room is Wide-Passage. South of Trophy-Room is Dining-Room. West of Trophy-Room is Hall-by-Thick-Wooden-Door.
+North of Cellar-with-Barred-Window is Slippery-Steps. South of Cellar-with-Barred-Window is Deep-Cellar-with-Coffin.
+North of Cliff-Path is Clifftop. South of Cliff-Path is Cliff-Path2.
+
+[Fifth row connections]
+South of Cupboard-with-Hanging-Coat is Closet. East of Cupboard-with-Hanging-Coat is Front-Hall.
+North of Front-Hall is Pool-of-Light. South of Front-Hall is Front-Lobby. East of Front-Hall is Sitting-Room. West of Front-Hall is Cupboard-with-Hanging-Coat.
+North of Sitting-Room is Impressive-Vaulted-Hallway. South of Sitting-Room is Library-of-Evil-Books. West of Sitting-Room is Front-Hall.
+East of Secret-Room is Weird-Cobwebby-Room.
+North of Steep-Marble-Stairs is Impressive-Vaulted-Hallway. South of Steep-Marble-Stairs is Library-of-Evil-Books. Up of Steep-Marble-Stairs is Upper-Gallery. Down of Steep-Marble-Stairs is Cupboard-with-Hanging-Coat.
+North of Dining-Room is Trophy-Room. South of Dining-Room is Study-with-Desk.
+North of Deep-Cellar-with-Coffin is Cellar-with-Barred-Window.
+North of Cliff-Path2 is Cliff-Path. South of Cliff-Path2 is Marsh.
+
+[Sixth row connections]
+North of Closet is Cupboard-with-Hanging-Coat.
+North of Front-Lobby is Gloomy-Passage. South of Front-Lobby is Front-Porch.
+North of Library-of-Evil-Books is Sitting-Room. South of Library-of-Evil-Books is Study-with-Desk. East of Library-of-Evil-Books is Steep-Marble-Stairs.
+North of Study-with-Desk is Library-of-Evil-Books. South of Study-with-Desk is Weird-Cobwebby-Room. East of Study-with-Desk is Spooky-Room.
+North of Weird-Cobwebby-Room is Secret-Room. East of Weird-Cobwebby-Room is Study-with-Desk.
+North of Very-Cold-Chamber is Spooky-Room. South of Very-Cold-Chamber is Soggy-Path.
+West of Spooky-Room is Study-with-Desk. North of Spooky-Room is Bottom-of-Spiral-Staircase. South of Spooky-Room is Very-Cold-Chamber.
+North of Soggy-Path is Very-Cold-Chamber. West of Soggy-Path is Marsh.
+
+[Seventh row connections]
+North of Rubble-Strewn-Verandah is Near-Crumbling-Wall. East of Rubble-Strewn-Verandah is Front-Porch.
+North of Front-Porch is Front-Lobby. West of Front-Porch is Rubble-Strewn-Verandah. East of Front-Porch is Sloping-Corridor. Up of Front-Porch is Upper-Gallery.
+North of Front-Tower is Bottom-of-Spiral-Staircase. East of Front-Tower is Upper-Gallery.
+West of Sloping-Corridor is Front-Porch. East of Sloping-Corridor is Upper-Gallery.
+North of Upper-Gallery is Steep-Marble-Stairs. West of Upper-Gallery is Front-Tower. East of Upper-Gallery is Sloping-Corridor.
+North of Marsh-by-Wall is Slippery-Steps. South of Marsh-by-Wall is Marsh.
+North of Marsh is Marsh-by-Wall. South of Marsh is Soggy-Path2. West of Marsh is Cliff-Path2.
+North of Soggy-Path2 is Soggy-Path. South of Soggy-Path2 is By-Twisted-Railing. West of Soggy-Path2 is Marsh.
+
+[Eighth row connections]
+North of By-Twisted-Railing is Soggy-Path2. East of By-Twisted-Railing is Path-Through-Iron-Gate.
+West of Path-Through-Iron-Gate is By-Twisted-Railing. East of Path-Through-Iron-Gate is By-Railings.
+North of By-Railings is Beneath-Front-Tower. East of By-Railings is Debris-from-Crumbling-Facade. West of By-Railings is Path-Through-Iron-Gate.
+South of Beneath-Front-Tower is By-Railings.
+North of Debris-from-Crumbling-Facade is Large-Fallen-Brickwork. South of Debris-from-Crumbling-Facade is Rotting-Stone-Arch. West of Debris-from-Crumbling-Facade is By-Railings.
+North of Large-Fallen-Brickwork is Beneath-Front-Tower. West of Large-Fallen-Brickwork is Debris-from-Crumbling-Facade. East of Large-Fallen-Brickwork is Crumbling-Clifftop.
+North of Rotting-Stone-Arch is Debris-from-Crumbling-Facade. West of Rotting-Stone-Arch is Large-Fallen-Brickwork.
+West of Crumbling-Clifftop is Large-Fallen-Brickwork.
+
+Book - Items
+
+[Setup all the game items and their starting locations]
+The painting is a thing in Hall-by-Thick-Wooden-Door. It is fixed in place.
+
+The ring is a thing in Rear-Turret-Room. 
+The description of the ring is "A valuable ring.".
+
+The magic-spells is a thing in Library-of-Evil-Books.
+The description of the magic-spells is "A book of magic spells. Using 'xzanfar' might be useful.".
+
+The goblet is a thing in Trophy-Room.
+The description of the goblet is "A silver goblet.".
+
+The scroll is a thing in Room-with-Inches-of-Dust.
+The description of the scroll is "The script is in an alien tongue.".
+
+The coins is a thing in Front-Tower.
+The description of the coins is "Valuable old coins.".
+
+The statue is a thing in Sloping-Corridor.
+The description of the statue is "A beautiful statue.".
+
+The candlestick is a thing in Cupboard-with-Hanging-Coat.
+The description of the candlestick is "A brass candlestick.".
+
+The matches is a thing in Kitchen.
+The description of the matches is "A box of matches.".
+
+The vacuum is a thing in Large-Fallen-Brickwork.
+The description of the vacuum is "A handheld vacuum cleaner.".
+
+The batteries is a thing in Closet.
+The description of the batteries is "A set of batteries.".
+
+The shovel is a thing in Dark-Alcove.
+The description of the shovel is "A sturdy shovel.".
+
+The axe is a thing in Rubble-Strewn-Verandah.
+The description of the axe is "A sharp axe.".
+
+The rope is a thing in Debris-from-Crumbling-Facade.
+The description of the rope is "A coil of rope.".
+
+The boat is a thing in Marsh.
+The boat is fixed in place.
+The description of the boat is "A small boat.".
+
+The aerosol is a thing in Spooky-Room.
+The description of the aerosol is "A can of aerosol spray.".
+
+The candle is a thing in Front-Hall.
+The description of the candle is "A wax candle.".
+
+The key is a thing in Weird-Cobwebby-Room.
+The description of the key is "A brass key.".
+
+The coat is a thing in Cupboard-with-Hanging-Coat.
+The coat is fixed in place.
+The description of the coat is "An old coat hanging in the cupboard.".
+
+The door is a thing in Hall-by-Thick-Wooden-Door.
+The door is fixed in place.
+The description of the door is "A thick wooden door.".
+
+The rubbish is a thing in Yard-by-Rubbish.
+The rubbish is fixed in place.
+The description of the rubbish is "Just some old rubbish.".
+
+The coffin is a thing in Deep-Cellar-with-Coffin.
+The coffin is fixed in place.
+The description of the coffin is "A creepy old coffin.".
+
+The books is a thing in Library-of-Evil-Books.
+The books is fixed in place.
+The description of the books is "Books of demonic works.".
+
+The desk is a thing in Study-with-Desk.
+The desk is fixed in place.
+The description of the desk is "A desk with a drawer.".
+
+The drawer is a thing in Study-with-Desk.
+The drawer is fixed in place.
+The drawer can be open or closed. The drawer is closed.
+The description of the drawer is "A drawer in the desk.".
+
+The wall is a thing in Study-with-Desk.
+The wall is fixed in place.
+The description of the wall is "A thin wall.".
+
+The huge-door is a thing in Trophy-Room.
+The huge-door is fixed in place.
+The huge-door can be open or closed. The huge-door is closed.
+The description of the huge-door is "A huge door.".
+
+Book - Special Rules
+
+After examining the desk:
+	say "There is a drawer in the desk.";
+	now the drawer is in Study-with-Desk;
+	continue the action.
+
+After examining the coat:
+	say "That's creepy!";
+	now the key is in the location;
+	continue the action.
+
+After examining the books:
+	say "They are demonic works.";
+	continue the action.
+
+Instead of examining the magic-spells when the player carries the magic-spells:
+	say "Use this word with care 'xzanfar'";
+	continue the action.
+
+After examining the scroll when the player carries the scroll:
+	say "The script is in an alien tongue.";
+	continue the action.
+
+Instead of going west from Deep-Cellar-with-Coffin when the magical-barrier is true:
+	say "A magical barrier to the west.";
+	stop the action.
+
+Instead of opening the drawer:
+	say "Drawer open.";
+	now the drawer is open;
+	stop the action.
+
+Instead of opening the huge-door:
+	say "It's locked.";
+	stop the action.
+
+Instead of unlocking the huge-door with the key:
+	if the player carries the key:
+		say "The key turns!";
+		now the huge-door is open;
+		now the south exit of Trophy-Room is Weird-Cobwebby-Room;
+		now the description of Trophy-Room is "Trophy room with huge open door.";
+	otherwise:
+		say "You don't have the key.";
+	stop the action.
+
+After taking inventory:
+	say "Press any key to continue.";
+	wait for any key;
+	continue the action.
+
+Book - Scoring
+
+After taking a thing:
+	increase the score by 1;
+	continue the action.
+
+Every turn when the score is 17:
+	if the player is in Path-Through-Iron-Gate:
+		say "You made it back to the gate with all the treasures! Double score!";
+		increase the score by 17;
+	else:
+		say "You have everything. Return to the gate for final score.";
+
+When play ends:
+	if the score is maximum score:
+		say "Well done! You finished the game."
